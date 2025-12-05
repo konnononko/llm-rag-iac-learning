@@ -1,5 +1,7 @@
 # llm-rag-iac-learning
 
+[![CI](https://github.com/konnononko/llm-rag-iac-learning/actions/workflows/ci.yml/badge.svg)](https://github.com/konnononko/llm-rag-iac-learning/actions/workflows/ci.yml)
+
 このリポジトリは、**クラウドネイティブな RAG（Retrieval-Augmented Generation）サービス** を  
 短期間で試作しながら学習することを目的としたプロジェクトです。
 
