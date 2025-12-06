@@ -20,10 +20,6 @@ def test_rag_query_returns_answer():
     assert isinstance(data["answer"], str)
     assert data["answer"] != ""
 
-    # ダミー実装では query をエコーバックしている想定なので、
-    # 念のためクエリ文字列が含まれていることも確認
-    assert "テストクエリ" in data["answer"]
-
 
 def test_rag_query_requires_query_field():
     # query フィールドがない場合は 422 (Unprocessable Entity) になることの確認
