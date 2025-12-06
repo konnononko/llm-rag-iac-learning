@@ -4,8 +4,15 @@ from app.main import app
 client = TestClient(app)
 
 
-def test_rag_query_returns_answer():
+def test_rag_query_returns_answer(monkeypatch):
     # Arrange
+    # mock api call
+    async def fake_get_rag_answer(query: str) -> str:
+        return f"[dummy answer] query={query}"
+
+    from app import main as main_module
+    monkeypatch.setattr(main_module, "get_rag_answer", fake_get_rag_answer)
+
     payload = {"query": "テストクエリ"}
 
     # Act
@@ -19,6 +26,7 @@ def test_rag_query_returns_answer():
     assert "answer" in data
     assert isinstance(data["answer"], str)
     assert data["answer"] != ""
+    assert "テストクエリ" in data["answer"]
 
 
 def test_rag_query_requires_query_field():
