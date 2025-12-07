@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import lru_cache
 
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as qmodels
@@ -15,21 +16,19 @@ class Document:
     text: str
 
 
-_settings = get_settings()
-
-
+@lru_cache
 def get_qdrant_client() -> QdrantClient:
     # ローカル Docker の Qdrant を想定
     # docker run -p 6333:6333 qdrant/qdrant などで起動
-    return QdrantClient(url=_settings.qdrant_url)
+    return QdrantClient(url=get_settings().qdrant_url)
 
 
 def ensure_collection() -> None:
     client = get_qdrant_client()
     client.recreate_collection(
-        collection_name=_settings.qdrant_collection,
+        collection_name=get_settings().qdrant_collection,
         vectors_config=qmodels.VectorParams(
-            size=_settings.qdrant_vector_size,
+            size=get_settings().qdrant_vector_size,
             distance=qmodels.Distance.COSINE,
         ),
     )
@@ -44,7 +43,7 @@ def index_documents(docs: list[Document]) -> None:
     vectors = embed_texts(texts)
 
     client.upsert(
-        collection_name=_settings.qdrant_collection,
+        collection_name=get_settings().qdrant_collection,
         points=[
             qmodels.PointStruct(
                 id=d.id,
@@ -64,7 +63,7 @@ def search_similar(query: str, limit: int = 4) -> list[str]:
     query_vector = embed_text(query)
 
     result = client.search(
-        collection_name=_settings.qdrant_collection,
+        collection_name=get_settings().qdrant_collection,
         query_vector=query_vector,
         limit=limit,
         with_payload=True,

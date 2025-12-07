@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from functools import lru_cache
 from typing import Iterable
 
 from openai import OpenAI
@@ -7,8 +8,10 @@ from openai import OpenAI
 from .config import get_settings
 
 
-_settings = get_settings()
-_client = OpenAI(api_key=_settings.openai_api_key)
+@lru_cache
+def get_client() -> OpenAI:
+    settings = get_settings()
+    return OpenAI(api_key=settings.openai_api_key)
 
 
 def embed_texts(texts: Iterable[str]) -> list[list[float]]:
@@ -19,8 +22,9 @@ def embed_texts(texts: Iterable[str]) -> list[list[float]]:
     if not texts_list:
         return []
 
-    response = _client.embeddings.create(
-        model=_settings.openai_embedding_model,
+    client = get_client()
+    response = client.embeddings.create(
+        model=get_settings.openai_embedding_model,
         input=texts_list,
     )
 

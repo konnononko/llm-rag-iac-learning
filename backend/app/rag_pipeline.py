@@ -1,13 +1,17 @@
 from __future__ import annotations
 
+from functools import lru_cache
+
 from openai import OpenAI
 
 from .config import get_settings
 from .vector_store import search_similar
 
 
-_settings = get_settings()
-_client = OpenAI(api_key=_settings.openai_api_key)
+@lru_cache
+def get_client() -> OpenAI:
+    settings = get_settings()
+    return OpenAI(api_key=settings.openai_api_key)
 
 
 def build_context_prompt(query: str, contexts: list[str]) -> str:
@@ -28,8 +32,9 @@ async def get_rag_answer(query: str) -> str:
     prompt = build_context_prompt(query, contexts)
 
     # LLM呼び出し
-    response = _client.chat.completions.create(
-        model=_settings.openai_model,
+    client = get_client()
+    response = client.chat.completions.create(
+        model=get_settings().openai_model,
         messages=[
             {"role": "user", "content": prompt},
         ],
