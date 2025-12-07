@@ -31,3 +31,69 @@
 - `backend/`  : FastAPI + RAG 実装
 - `infra/docker/`  : ローカル開発環境（Docker）
 - `infra/terraform/`  : IaC - AWS リソース管理
+
+## Getting Started
+
+### Requirements
+
+- Python 3.12+
+- Docker (Qdrant の起動に使用)
+
+### Setup
+
+```bash
+git clone https://github.com/konnononko/llm-rag-iac-learning.git
+cd llm-rag-iac-learning/backend
+
+uv sync
+
+cp .env.example .env
+# OPENAI_API_KEY などを設定
+
+# Qdrant 起動
+docker run -d --name qdrant -p 6333:6333 qdrant/qdrant
+
+# Ingest sample documents
+uv run python -m app.ingest
+```
+
+## Usage
+
+### Run API Server
+
+```bash
+cd backend
+uv run uvicorn app.main:app --reload
+```
+
+API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+
+### Health Check
+
+```bash
+curl http://localhost:8000/health
+# → {"status": "ok"}
+```
+
+### RAG Query Example
+
+```bash
+curl -X POST "http://localhost:8000/rag/query" -H "Content-Type: application/json" -d '{"query": "このプロジェクトの目的は？"}'
+```
+### Run Tests
+
+```bash
+cd backend
+# linter check
+uv run ruff check .
+# run tests
+uv run pytest
+```
+
+## Changelog
+
+### v0.1.0 – RAG Pipeline Minimum Viable Version
+
+- Qdrant + OpenAI embeddings + FastAPI
+- CI pipeline (pytest / ruff / lint OK)
+- FAQ-style RAG response working
