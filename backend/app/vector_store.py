@@ -72,15 +72,15 @@ def search_similar(query: str, limit: int = 4) -> list[str]:
     client = get_qdrant_client()
     query_vector = embed_text(query)
 
-    result = client.search(
+    result = client.query_points(
         collection_name=get_settings().qdrant_collection,
-        query_vector=query_vector,
+        query=query_vector,
         limit=limit,
         with_payload=True,
     )
 
     contexts: list[str] = []
-    for point in result:
+    for point in result.points:
         payload = point.payload or {}
         text = payload.get("text")
         if text:
