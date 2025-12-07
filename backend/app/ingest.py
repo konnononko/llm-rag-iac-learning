@@ -6,7 +6,8 @@ from .vector_store import Document, ensure_collection, index_documents
 
 
 def load_readme_chunks() -> list[Document]:
-    readme_path = Path(__file__).resolve().parents[1] / "README.md"
+    source_file = "README.md"
+    readme_path = Path(__file__).resolve().parents[2] / source_file
     content = readme_path.read_text(encoding="utf-8")
 
     # 超ざっくり：行ベース or 固定長でチャンクに分割
@@ -25,7 +26,7 @@ def load_readme_chunks() -> list[Document]:
 
     docs: list[Document] = []
     for i, chunk in enumerate(chunks):
-        docs.append(Document(id=f"readme-{i}", text=chunk))
+        docs.append(Document(id=i, text=chunk, source=source_file))
 
     return docs
 
@@ -34,3 +35,7 @@ def ingest_readme() -> None:
     ensure_collection()
     docs = load_readme_chunks()
     index_documents(docs)
+
+
+if __name__ == "__main__":
+    ingest_readme()

@@ -24,7 +24,7 @@ def embed_texts(texts: Iterable[str]) -> list[list[float]]:
 
     client = get_client()
     response = client.embeddings.create(
-        model=get_settings.openai_embedding_model,
+        model=get_settings().openai_embedding_model,
         input=texts_list,
     )
 

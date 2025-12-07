@@ -12,8 +12,9 @@ from .embeddings import embed_texts, embed_text
 
 @dataclass
 class Document:
-    id: str
+    id: int    # QdrantのPoint IDとして使う
     text: str
+    source: str | None = None    # 元ファイル名など
 
 
 @lru_cache
@@ -39,19 +40,28 @@ def index_documents(docs: list[Document]) -> None:
     Docs を埋め込み＋Qdrant に投入する最小実装。
     """
     client = get_qdrant_client()
+    settings = get_settings()
+
     texts = [d.text for d in docs]
     vectors = embed_texts(texts)
 
-    client.upsert(
-        collection_name=get_settings().qdrant_collection,
-        points=[
+    points = []
+    for d, v in zip(docs, vectors):
+        payload = {"text": d.text}
+        if d.source is not None:
+            payload["source"] = d.source
+
+        points.append(
             qmodels.PointStruct(
                 id=d.id,
                 vector=v,
-                payload={"text": d.text},
+                payload=payload,
             )
-            for d, v in zip(docs, vectors)
-        ],
+        )
+
+    client.upsert(
+        collection_name=settings.qdrant_collection,
+        points=points,
     )
 
 
